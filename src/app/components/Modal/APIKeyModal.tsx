@@ -2,106 +2,88 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styled from 'styled-components';
+import { useMutation } from '@tanstack/react-query';
+import * as S from './modal.styles';
 
-const ModalContainer = styled.div`
-  width: 100%;
-  max-width: 28rem;
-  padding: 1.5rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-`;
+interface EncryptKeyResponse {
+  encryptedKey: string;
+}
 
-const Title = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-`;
+interface ValidateKeyResponse {
+  success: boolean;
+}
 
-const Description = styled.p`
-  margin-bottom: 1rem;
-  color: #4b5563;
-  
-  a {
-    color: #3b82f6;
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-    }
+const validateKey = async (apiKey: string): Promise<ValidateKeyResponse> => {
+  const response = await fetch('/api/validate-key', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey }),
+  });
+
+  if (!response.ok) {
+    throw new Error('API 키 검증에 실패했습니다');
   }
-`;
 
-const Input = styled.input`
-  width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-`;
+  return response.json();
+};
 
-const ErrorMessage = styled.p`
-  color: #ef4444;
-  margin-bottom: 1rem;
-`;
+const encryptKey = async (apiKey: string): Promise<EncryptKeyResponse> => {
+  const response = await fetch('/api/encrypt-key', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey }),
+  });
 
-const SubmitButton = styled.button`
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  
-  &:hover {
-    background-color: #2563eb;
+  if (!response.ok) {
+    throw new Error('API 키 암호화에 실패했습니다');
   }
-  
-  &:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-  }
-`;
+
+  return response.json();
+};
 
 export default function APIKeyModal() {
   const [apiKey, setApiKey] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
 
-  const validateAPIKey = async (key: string) => {
-    try {
-      const response = await fetch('/api/validate-key', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ apiKey: key }),
-      });
+  // API 키 검증 mutation
+  const validateMutation = useMutation({
+    mutationFn: validateKey,
+    onSuccess: async () => {
+      // 검증 성공 시 암호화 mutation 실행
+      await encryptMutation.mutateAsync(apiKey);
+    },
+  });
 
-      if (!response.ok) throw new Error('잘못된 API 키입니다');
-      
-      localStorage.setItem('gpt-api-key', key);
+  // API 키 암호화 mutation
+  const encryptMutation = useMutation({
+    mutationFn: encryptKey,
+    onSuccess: (data) => {
+      // 암호화된 키를 세션 스토리지에 저장
+      sessionStorage.setItem('encrypted-api-key', data.encryptedKey);
       router.push('/chat');
-    } catch (err) {
-      setError('API 키 검증에 실패했습니다');
-      setIsLoading(false);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey.trim()) return;
+
+    try {
+      await validateMutation.mutateAsync(apiKey);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    validateAPIKey(apiKey);
-  };
+  // 에러 상태 계산
+  const error = validateMutation.error || encryptMutation.error;
+  // 로딩 상태 계산
+  const isLoading = validateMutation.isPending || encryptMutation.isPending;
 
   return (
-    <ModalContainer>
-      <Title>API 키 입력</Title>
-      <Description>
+    <S.ModalContainer>
+      <S.Title>API 키 입력</S.Title>
+      <S.Description>
         OpenAI API 키를 입력해주세요. API 키는{' '}
         <a
           href="https://platform.openai.com/api-keys"
@@ -111,23 +93,28 @@ export default function APIKeyModal() {
           여기서
         </a>{' '}
         얻을 수 있습니다.
-      </Description>
+      </S.Description>
       
       <form onSubmit={handleSubmit}>
-        <Input
+        <S.Input
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="sk-..."
           required
+          disabled={isLoading}
         />
         
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && (
+          <S.ErrorMessage>
+            {error instanceof Error ? error.message : '오류가 발생했습니다'}
+          </S.ErrorMessage>
+        )}
         
-        <SubmitButton type="submit" disabled={isLoading}>
-          {isLoading ? '확인 중...' : '시작하기'}
-        </SubmitButton>
+        <S.SubmitButton type="submit" disabled={isLoading}>
+          {isLoading ? '처리 중...' : '시작하기'}
+        </S.SubmitButton>
       </form>
-    </ModalContainer>
+    </S.ModalContainer>
   );
 }
