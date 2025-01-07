@@ -1,146 +1,152 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import ChatMessage from '@/app/components/Chat/ChatMessage';
-import { useMutation } from '@tanstack/react-query';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 1rem;
-`;
-
-const ChatArea = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #f9fafb;
-`;
-
-const InputArea = styled.form`
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: white;
-`;
-
-const Input = styled.input`
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    ring: 2px solid #3b82f6;
-  }
-`;
-
-const SendButton = styled.button`
-  padding: 0.5rem 1rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  
-  &:hover {
-    background-color: #2563eb;
-  }
-  
-  &:disabled {
-    background-color: #9ca3af;
-  }
-`;
-
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
-};
-
-// API 호출 함수 분리
-const sendChatMessage = async (payload: { messages: Message[], apiKey: string | null }) => {
-  const response = await fetch('/api/chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error('응답 오류');
-  }
-
-  return response.json();
-};
+import { useChat } from 'ai/react';
+import { Model } from '@/app/types/chat';
+import { models } from '@/app/constants/model';
+import * as S from './chat.styles';
+import SettingsModal from './SettingsModal';
+import { ModelSelectContainer, ModelSelect, SelectArrow } from './chat.styles';
+import { useCustomChat } from '@/app/hooks/useCustomChat';
+import { useScrollToBottom } from '@/app/hooks/useScrollToBottom';
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const chatAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const scrollToBottom = useScrollToBottom(chatAreaRef);
+  const [model, setModel] = useState<Model>('gpt-3.5-turbo');
+  const encryptedKey = typeof window !== 'undefined' ? sessionStorage.getItem('encrypted-api-key') : null;
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(2000);
 
-  const chatMutation = useMutation({
-    mutationFn: sendChatMessage,
-    onSuccess: (data) => {
-      setMessages(prev => [...prev, { role: 'assistant', content: data.content }]);
-    },
-    onError: (error) => {
-      console.error('Error:', error);
-      alert('메시지 전송 중 오류가 발생했습니다.');
-    }
+  const {
+    messages,
+    input,
+    setInput,
+    isLoading,
+    append,
+    stop
+  } = useCustomChat({
+    encryptedKey,
+    model,
+    temperature,
+    maxTokens
   });
 
-  const scrollToBottom = () => {
-    if (chatAreaRef.current) {
-      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if(input.length === 0){
+      return;
+    }
+
+    append({
+      role: 'user',
+      content: input
+    })
+
+    setInput('');
+    inputRef.current?.focus();
+  }   
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim() && !isLoading) {
+        append({
+          role: 'user',
+          content: input
+        });
+        setInput('');
+        inputRef.current?.focus();
+      }
     }
   };
+
+  // textarea 높이 자동 조절
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 200)}px`;
+    }
+  }, [input]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || chatMutation.isPending) return;
-
-    const newMessage: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, newMessage]);
-    setInput('');
-
-    chatMutation.mutate({
-      messages: [...messages, newMessage],
-      apiKey: localStorage.getItem('gpt-api-key'),
-    });
-  };
+  }, [isLoading]);
 
   return (
-    <Container>
-      <ChatArea ref={chatAreaRef}>
-        {messages.map((message, index) => (
-          <ChatMessage key={index} {...message} />
-        ))}
-      </ChatArea>
-      <InputArea onSubmit={handleSubmit}>
-        <Input
+    <S.Container>
+      <S.Header>
+        <ModelSelectContainer>
+          <ModelSelect
+            value={model}
+            onChange={(e) => setModel(e.target.value as Model)}
+            disabled={isLoading}
+            title={models.find(m => m.id === model)?.description}
+          >
+            {models.map((model) => (
+              <option 
+                key={model.id} 
+                value={model.id}
+                title={model.description}
+              >
+                {model.name}
+              </option>
+            ))}
+          </ModelSelect>
+          <SelectArrow>▼</SelectArrow>
+        </ModelSelectContainer>
+        <S.SettingsButton onClick={() => setIsSettingsOpen(true)}>
+          <div>
+            설정
+          </div>
+        </S.SettingsButton>
+      </S.Header>
+      <S.ChatArea ref={chatAreaRef}>
+        <>
+          {messages.map((message, index) => (
+            <ChatMessage key={index} {...message} />
+          ))}
+          {
+            isLoading && (
+              <div>
+                loading...
+              </div>
+            )
+          }
+        </>
+      </S.ChatArea>
+      <S.InputArea onSubmit={handleSubmit}>
+        <S.Textarea
+          ref={inputRef}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e)=>setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="메시지를 입력하세요..."
-          disabled={chatMutation.isPending}
         />
-        <SendButton type="submit" disabled={chatMutation.isPending}>
-          {chatMutation.isPending ? '전송 중...' : '전송'}
-        </SendButton>
-      </InputArea>
-    </Container>
+        <S.SendButton type="submit" 
+        onClick={()=>{
+          if(isLoading){
+            stop();
+          }
+        }}>
+          {isLoading ? '중지' : '전송'}
+        </S.SendButton>
+      </S.InputArea>
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        temperature={temperature}
+        maxTokens={maxTokens}
+        onSave={(newTemp, newMaxTokens) => {
+          setTemperature(newTemp);
+          setMaxTokens(newMaxTokens);
+        }}
+      />
+    </S.Container>
   );
 }
