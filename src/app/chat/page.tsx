@@ -18,7 +18,7 @@ export default function ChatPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const apiKey = localStorage.getItem('gpt-api-key');
+    const apiKey = sessionStorage.getItem('encrypted-api-key');
     if (!apiKey) {
       router.push('/');
     }
