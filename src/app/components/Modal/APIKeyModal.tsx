@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import * as S from './modal.styles';
 import InfoToggle from './InfoToggle';
 import RecommendToggle from "./RecommendToggle"
-import { validateKeyMutation, encryptMutation } from '@/app/react-query/mutations/mutations';
+import { useValidateKeyMutation, useEncryptMutation } from '@/app/react-query/mutations/mutations';
 
 export default function APIKeyModal() {
   const [apiKey, setApiKey] = useState('');
   const router = useRouter();
 
   // API 키 검증 mutation
-  const validateMutation = validateKeyMutation(apiKey);
-  const encryptMutationResult = encryptMutation();
+  const validateMutation = useValidateKeyMutation(apiKey);
+  const encryptMutationResult = useEncryptMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +33,7 @@ export default function APIKeyModal() {
 
   return (
     <S.ModalContainer>
-      <S.Title>AI 챗봇 시작하기</S.Title>
+      <S.Title>KeyChat</S.Title>
 
       <S.Description>
         OpenAI API 키를 입력해주세요. API 키는{' '}
