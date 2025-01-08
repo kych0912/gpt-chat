@@ -8,6 +8,11 @@ export const models: ModelInfo[] = [
       description: 'Reasoning models that excel at complex, multi-step tasks'
     },
     {
+      id: 'o1-preview',
+      name: 'o1-preview',
+      description: 'Reasoning models that excel at complex, multi-step tasks'
+    },
+    {
       id: 'o1-mini',
       name: 'o1-mini',
       description: 'Reasoning models that excel at complex, multi-step tasks'
