@@ -12,16 +12,10 @@ const MainContainer = styled.main`
   padding: 1rem;
 `;
 
-const MainTitle = styled.h1`
-  font-size: 2.25rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-`;
 
 export default function Home() {
   return (
     <MainContainer>
-      <MainTitle>GPT 채팅 서비스</MainTitle>
       <APIKeyModal />
     </MainContainer>
   );
