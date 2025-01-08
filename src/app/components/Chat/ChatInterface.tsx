@@ -1,16 +1,15 @@
 'use client';
 
-import { useRef, useState, useEffect, useMemo } from 'react';
-import styled from 'styled-components';
+import { useRef, useState, useEffect } from 'react';
 import ChatMessage from '@/app/components/Chat/ChatMessage';
-import { useChat } from 'ai/react';
 import { Model } from '@/app/types/chat';
 import { models } from '@/app/constants/model';
 import * as S from './chat.styles';
-import SettingsModal from './SettingsModal';
+import SettingsModal from '../Modal/SettingsModal';
 import { ModelSelectContainer, ModelSelect, SelectArrow } from './chat.styles';
 import { useCustomChat } from '@/app/hooks/useCustomChat';
 import { useScrollToBottom } from '@/app/hooks/useScrollToBottom';
+import Loading from '../Loading/Loading';
 
 export default function ChatInterface() {
   const chatAreaRef = useRef<HTMLDivElement>(null);
@@ -113,9 +112,7 @@ export default function ChatInterface() {
           ))}
           {
             isLoading && (
-              <div>
-                loading...
-              </div>
+              <Loading />
             )
           }
         </>
