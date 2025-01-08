@@ -54,7 +54,7 @@ export const Textarea = styled.textarea`
   
   &:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: ${({theme})=>theme.primary};
   }
   
   &:disabled {
@@ -65,7 +65,7 @@ export const Textarea = styled.textarea`
 
 export const SendButton = styled.button`
   padding: 0.5rem 1rem;
-  background-color: #3b82f6;
+  background-color: ${({theme})=>theme.primary};
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -88,9 +88,9 @@ export const MessageContainer = styled.div<{ $isUser: boolean }>`
 
 export const MessageBubble = styled.div<{ $isUser: boolean }>`
   max-width: 70%;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 1rem;
-  background-color: ${props => props.$isUser ? '#3b82f6' : '#ffffff'};
+  background-color: ${props => props.$isUser ? (({theme})=>theme.primary) : '#ffffff'};
   color: ${props => props.$isUser ? '#ffffff' : '#000000'};
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   // 마크다운 스타일링
@@ -143,7 +143,7 @@ export const MessageBubble = styled.div<{ $isUser: boolean }>`
   blockquote {
     margin: 0.5rem 0;
     padding-left: 1rem;
-    border-left: 3px solid ${props => props.$isUser ? '#ffffff' : '#3b82f6'};
+    border-left: 3px solid ${props => props.$isUser ? '#ffffff' : (({theme})=>theme.primary)};
     font-style: italic;
   }
 
@@ -154,7 +154,7 @@ export const MessageBubble = styled.div<{ $isUser: boolean }>`
   }
 
   a {
-    color: ${props => props.$isUser ? '#ffffff' : '#3b82f6'};
+    color: ${props => props.$isUser ? '#ffffff' : (({theme})=>theme.primary)};
     text-decoration: underline;
     
     &:hover {
@@ -183,7 +183,7 @@ export const Header = styled.div`
   display: flex;
   align-items: center;
   padding: 1rem;
-  background-color: #f9fafb;
+  background-color: ${({theme})=>theme.secondary};
   border-bottom: 1px solid #e5e7eb;
 `;
 
