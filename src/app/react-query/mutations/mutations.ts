@@ -4,7 +4,7 @@ import encryptKey from '@/app/util/encrypApiKey';
 import { useRouter } from 'next/navigation';
 
   // API 키 암호화 mutation
-  export const encryptMutation = () =>{
+  export const useEncryptMutation = () =>{
     const router = useRouter();
     return(
         useMutation({
@@ -19,8 +19,8 @@ import { useRouter } from 'next/navigation';
 }
 
 
-export const validateKeyMutation = (apiKey: string) => {
-    const encrypt = encryptMutation();
+export const useValidateKeyMutation = (apiKey: string) => {
+    const encrypt = useEncryptMutation();
     
     return useMutation({
         mutationFn: validateKey,
