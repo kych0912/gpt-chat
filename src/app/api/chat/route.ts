@@ -17,12 +17,13 @@ export async function POST(request: Request) {
         system: model.includes('o1-') ? undefined : 'You are a helpful assistant.',
         messages,
         temperature: temperature,
-        maxTokens: maxTokens,
+        maxTokens: model.includes('o1-') ?undefined : maxTokens,
     });
 
     for await (const part of textStream.fullStream) {
         switch (part.type) {
           case 'error': { 
+            console.log('Error:', part.error);
             return handleAPIError(part.error as APIError);
           }
         }
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     return textStream.toDataStreamResponse();
   } catch (error) {
     return NextResponse.json(
-      { error: 'Chat failed' }, 
+      { error: error }, 
       { status: 500 }
     );
   }
