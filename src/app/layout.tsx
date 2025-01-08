@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from './providers';
-import StyledComponentsRegistry from "./lib/registry";
+import LayoutProvider from './provider/LayoutProvider';
+import { pretendard } from "./style/fonts/fonts";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,11 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={pretendard.variable}>
       <body className={inter.className}>
-        <StyledComponentsRegistry>
+        <LayoutProvider>
           <Providers>{children}</Providers>
-        </StyledComponentsRegistry>
+        </LayoutProvider>
       </body>
     </html>
   );
