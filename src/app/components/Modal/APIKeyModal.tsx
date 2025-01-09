@@ -35,8 +35,10 @@ export default function APIKeyModal() {
     <S.ModalContainer>
       <S.Title>KeyChat</S.Title>
 
-      <S.Description>
-        OpenAI API 키를 입력해주세요. API 키는{' '}
+      <S.Description>  
+        서비스 이용을 위한 개인 번호(API KEY)가 필요합니다.
+        <br/>
+        개인 번호는{' '}      
         <a
           href="https://platform.openai.com/api-keys"
           target="_blank"
@@ -44,12 +46,21 @@ export default function APIKeyModal() {
         >
           여기서
         </a>{' '}
-        얻을 수 있습니다.
+        얻을 수 있으며,{' '} 
+        <a
+          href="https://platform.openai.com/settings/organization/billing/overview"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          크레딧 충전
+        </a>
+        이 필요합니다.
       </S.Description>
+
       
       <S.Description>
         <span style={{ display: 'block', fontWeight:800}}>
-          이 서비스는 API 키, 채팅 내역을{' '}
+          KeyChat은 API 키, 채팅 내역을{' '}
           <strong style={{
             color: '#dc2626',
             fontWeight: '600'
@@ -63,7 +74,7 @@ export default function APIKeyModal() {
           type="password"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
-          placeholder="sk-..."
+          placeholder="개인 번호를 입력해주세요."
           required
           disabled={isLoading}
           autoComplete="off"
