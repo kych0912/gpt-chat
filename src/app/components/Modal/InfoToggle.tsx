@@ -12,9 +12,9 @@ export default function InfoToggle() {
         
         {isOpen && (
           <S.InfoContent>
-            <p>아니요, ChatGPT Plus 구독은 필요하지 않습니다!</p>
+            <p>아니요, ChatGPT Plus 구독은 필요하지 않아요!</p>
             <ul>
-              <li>• OpenAI API는 별도의 서비스입니다</li>
+              <li>• OpenAI API는 별도의 서비스에요.</li>
               <li>• 크레딧을 충전한 후 API 사용량만큼만 지불하면 됩니다</li>
             </ul>
           </S.InfoContent>

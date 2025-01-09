@@ -40,7 +40,7 @@ export default function APIKeyModal() {
       </S.DescriptionTitle>
 
       <S.Description>  
-        서비스 이용을 위한 개인 번호(API KEY)가 필요합니다.
+        서비스 이용을 위한 개인 번호(API KEY)가 필요해요.
         <br/>
         개인 번호는{' '}      
         <a
@@ -58,7 +58,7 @@ export default function APIKeyModal() {
         >
           크레딧 충전
         </a>
-        이 필요합니다.
+        이 필요해요.
       </S.Description>
 
       
@@ -68,7 +68,7 @@ export default function APIKeyModal() {
           <strong style={{
             color: '#dc2626',
             fontWeight: '600'
-          }}>저장하지 않습니다.</strong>
+          }}>저장하지 않아요.</strong>
         </span>
         키는 안전한 곳에 따로 보관해주세요.
       </S.Description>
