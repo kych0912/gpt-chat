@@ -18,6 +18,14 @@ export const Title = styled.h2`
   text-align: center;
 `;
 
+export const DescriptionTitle = styled.p`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: start;
+  margin-bottom: 1rem;
+`;
+
 export const Description = styled.p`
   margin-bottom: 1.25rem;
   color: #4b5563;

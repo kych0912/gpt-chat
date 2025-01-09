@@ -35,6 +35,10 @@ export default function APIKeyModal() {
     <S.ModalContainer>
       <S.Title>KeyChat</S.Title>
 
+      <S.DescriptionTitle>
+        GPT 사용량 만큼만 결제하세요.
+      </S.DescriptionTitle>
+
       <S.Description>  
         서비스 이용을 위한 개인 번호(API KEY)가 필요합니다.
         <br/>
